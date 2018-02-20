@@ -2,7 +2,6 @@
 #include<vector>
 #include<deque>
 #include<cstdio>
-
 using namespace std;
 
 class Graph{
