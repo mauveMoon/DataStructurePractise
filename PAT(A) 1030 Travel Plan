@@ -1,0 +1,98 @@
+#include<iostream>
+#include<vector>
+#include<list>
+#define INF  10000
+
+using namespace std;
+
+class Edge{
+public:
+	int v, w, c;
+	Edge(int iv, int iw, int ic){
+		v = iv;
+		w = iw;
+		c = ic;
+	}
+};
+
+class Graph{
+public:
+	int nNode;
+	vector<list<Edge>> edge;
+	Graph(int n){
+		nNode = n;
+		for(int i=0;i<nNode;i++){
+			list<Edge> t;
+			edge.push_back(t);
+		}
+	}
+	void add_edge(int v1, int v2, int w, int c){
+		Edge e1 = Edge(v2, w, c);
+		Edge e2 = Edge(v1, w, c);
+		edge[v1].push_back(e1);
+		edge[v2].push_back(e2);
+	}
+	
+	list<int> dijkstra(int v1, int v2){
+		vector<int> dist(nNode, INF);
+		vector<bool> visited(nNode, 0);
+		vector<int> cost(nNode, 0);
+		vector<int> front(nNode, -1);
+		
+		dist[v1] = 0;
+		
+		while(1){
+			int minPos = -1, minDist = INF;
+			for(int i=0;i<nNode;i++){
+				if(dist[i] < minDist && !visited[i]){
+					minPos = i;
+					minDist = dist[i];
+				}
+			}
+			if(minPos == -1) break;
+			
+			visited[minPos] = 1;
+			for(auto x:edge[minPos]){
+				if(dist[minPos] + x.w < dist[x.v] && !visited[x.v]){
+					dist[x.v] = dist[minPos] + x.w;
+					cost[x.v] = cost[minPos] + x.c;
+					front[x.v] = minPos;
+				}else if(dist[minPos] + x.w == dist[x.v] && !visited[x.v] && cost[minPos] + x.c < cost[x.v]){
+					cost[x.v] = cost[minPos] + x.c;
+					front[x.v] = minPos;
+				}
+			}
+		}
+		list<int> ans;
+		ans.push_back(dist[v2]);
+		ans.push_back(cost[v2]);
+		int end = v2;
+		while(end != -1){
+			ans.push_front(end);
+			end = front[end];
+		}
+		return ans;
+	}
+};
+
+int main(){
+	int N, M, S, D;
+	cin >> N >> M >> S >> D;
+	Graph g(N);
+	int iv1, iv2, iw, ic;
+	for(int i=0;i<M;i++){
+		cin >> iv1 >> iv2 >> iw >> ic;
+		g.add_edge(iv1, iv2, iw, ic);
+	}
+	auto ans = g.dijkstra(S, D);
+	vector<int> res;
+	for(auto x: ans) {
+		res.push_back(x);
+	}
+	for(auto it = res.begin();it!=res.end()-1;it++){
+		cout << *it << " ";
+	}
+	auto it = res.end() - 1;
+	cout << *it << endl;
+	return 0;
+}
