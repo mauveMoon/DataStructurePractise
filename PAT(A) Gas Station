@@ -1,0 +1,150 @@
+#include<iostream>
+#include<string>
+#include<sstream>
+#include<vector>
+#include<list>
+#include<deque>
+#include<algorithm>
+#define ERROR printf
+#define INF 100000
+using namespace std;
+
+class Edge{
+public:
+	int v,w;
+	Edge(int iv, int iw){
+		v = iv;
+		w = iw;
+	}
+};
+
+class Graph{
+public:
+	int nNode;
+	vector<list<Edge>> edge;
+	Graph(int n){
+		nNode = n;
+		for(int i=0;i<n;i++){
+			list<Edge> t;
+			edge.push_back(t);
+		}
+	}
+	void add_edge(int v1, int v2, int w){
+		Edge e1(v2, w);
+		Edge e2(v1, w);
+		edge[v1].push_back(e1);
+		edge[v2].push_back(e2);
+	}
+	vector<int> dijkstra(int v){
+		vector<int> dist(nNode, INF);
+		vector<bool> visited(nNode, 0);
+		
+		dist[v] = 0;
+		
+		while(1){
+			int minPos = -1, minDist = INF;
+			for(int i=1;i<nNode;i++){
+				if(dist[i] < minDist && !visited[i]){
+					minPos = i;
+					minDist = dist[i];
+				}
+			}
+			if(minPos == -1) break;
+			visited[minPos] = 1;
+			for(auto x:edge[minPos]){
+				if(!visited[x.v] && dist[minPos] + x.w < dist[x.v]){
+					dist[x.v] = dist[minPos] + x.w;
+				}
+			}
+		}
+		return dist;
+	}
+	void solve(int s, int range, int &obj, double &minDist, double &sum){
+		for(int i=s;i<nNode;i++){
+			vector<int> dist = dijkstra(i);
+			int thisDist = INF, thisSum = 0;
+			bool err = false;
+			for(int j=1;j<s;j++){
+				thisSum += dist[j];
+				if(dist[j] > range) {
+					err = true;
+					break;
+				}
+				if(dist[j] < thisDist)thisDist = dist[j];
+			}
+			if(thisDist > minDist && !err){
+				obj = i;
+				minDist = thisDist;
+				sum = thisSum;
+			}
+			else if(thisDist == minDist && !err && thisSum < sum){
+				obj = i;
+				minDist = thisDist;
+				sum = thisSum;
+			}
+		} 
+		return ;
+	}
+	
+};
+
+int trans(string str, int n){
+	stringstream ss;
+	string st;
+	int t;
+	if(str[0] == 'G'){
+		st = str.substr(1, str.length());
+		ss << st;
+		ss >> t;
+		t+=n;
+	}else {
+		st = str;
+		ss << st;
+		ss >> t;
+	}
+
+	return t;
+}
+
+string pg(int n){
+	stringstream ss;
+	string str;
+	string st;
+	ss << n;
+	ss >> st;
+	str = 'G' + st;
+	return str;
+}
+
+double precision(double x){
+	double p10 = x*10;
+	int i10 = (int)(x*10);
+	double s = p10 - i10;
+	if(s >= 0.5) return (i10+1) / 10.0;
+	else return x;
+}
+
+int main(){
+	int N, M, K, R;
+	cin >> N >> M >> K >> R;
+	Graph g(N+M+1);
+	string sv1, sv2;
+	int v1, v2;
+	int w;
+	for(int i=0;i<K;i++){
+		cin >> sv1 >> sv2 >> w;
+		v1 = trans(sv1, N);
+		v2 = trans(sv2, N);
+		g.add_edge(v1, v2, w);
+	}
+	int obj = N+1;
+	double minDist = -1.0;
+	double sum = 0.0;
+	g.solve(N+1, R, obj, minDist, sum);
+	if(minDist == -1) cout << "No Solution" << endl;
+	else{
+		cout << pg(obj - N) << endl;
+		printf("%.1lf %.1lf\n", minDist, precision(1.0*sum/N));
+	}
+	return 0;
+}
