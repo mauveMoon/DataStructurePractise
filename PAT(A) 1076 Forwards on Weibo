@@ -1,0 +1,94 @@
+#include<iostream>
+#include<vector>
+#include<deque>
+#include<list>
+#define ERROR printf
+
+using namespace std;
+ 
+class Graph{
+public:
+	int nNode;
+	vector<list<int>> edge;
+	Graph(int n){
+		nNode = n;
+		for(int i=0;i<n;i++){
+			list<int> t;
+			edge.push_back(t);
+		}
+	}
+	void add_edge(int v1, int v2){
+		edge[v1].push_back(v2);
+	}
+	void bfs(int v, int d){
+		vector<bool> visited(nNode, 0);
+		deque<int> temp1;
+		deque<int> temp2;
+		deque<int> *deq1;
+		deque<int> *deq2;
+		
+		temp1.push_back(v);
+		visited[v] = 1;
+		int L = 0;
+		int cnt = 0;
+		while(!temp1.empty() || !temp2.empty()){
+			if(!temp1.empty() && !temp2.empty()) ERROR("ERROR!\n");
+			if(!temp1.empty()){
+				deq1 = &temp1;
+				deq2 = &temp2;
+			}else if(!temp2.empty()){
+				deq2 = &temp1;
+				deq1 = &temp2;
+			}
+			
+
+			while(!deq1->empty()){
+				int top = deq1->front();
+//				cout << top << " " << L << " " << cnt << endl;
+				visited[top] = 1; 
+				deq1->pop_front();
+				for(auto x:edge[top]){
+					if(!visited[x]){
+						deq2->push_back(x);
+						if(L<d) cnt++;
+						visited[x] = 1;
+					}
+				}
+			}
+			L++;
+			
+		}
+		cout << cnt << endl;
+		return ;
+	}
+	void show_edge(){
+		for(int i=1;i<nNode;i++){
+			cout << i << ": ";
+			for(auto x:edge[i]){
+				cout << x << " ";
+			}
+			cout << endl;
+		}
+	}
+};
+
+int main(){
+	int N, L;
+	cin >> N >> L;
+	Graph g(N+1);
+	int n, v;
+	for(int i=1;i<=N;i++){
+		cin >> n;
+		while(n--){
+			cin >> v;
+			g.add_edge(v, i);
+		}
+	}
+	cin >> n;
+	while(n--){
+		cin >> v;
+		g.bfs(v, L);
+//		cout << endl;
+	}
+	return 0;
+}
