@@ -5,6 +5,4 @@
 
 1、列出连通集
 
-2、File transfer
-
 3、All Roads Lead to Rome
