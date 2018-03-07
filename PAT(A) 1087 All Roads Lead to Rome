@@ -1,0 +1,128 @@
+#include<vector>
+#include<list>
+#include<map>
+#include<iostream>
+#include<string>
+#define INF 10000
+
+using namespace std;
+
+class Edge{
+public:
+	int v, w;
+	Edge(int iv, int iw){
+		v = iv;
+		w = iw;
+	}
+};
+
+class Graph{
+public:
+	int nNode;
+	vector<list<Edge>> edge;
+	vector<int> weight;
+	Graph(int n, vector<int> iwei){
+		nNode = n;
+		for(int i=0;i<n;i++){
+			list<Edge> t;
+			edge.push_back(t);
+			weight.push_back(iwei[i]);
+		}
+	}
+	void add_edge(int v1, int v2, int w){
+		Edge e1(v2, w);
+		Edge e2(v1, w);
+		edge[v1].push_back(e1);
+		edge[v2].push_back(e2);
+	}
+	void dijkstra(map<int, string> pos, int rom){
+		vector<bool> visited(nNode, 0);
+		vector<int> dist(nNode, INF);
+		vector<int> hapin(nNode, 0);  // 节点总权值 
+		vector<int> front(nNode, 0);  // 前驱节点数量 
+		vector<int> pre(nNode, -1);  // 前驱结点 
+		vector<int> path(nNode, 1);  // 路径数量 
+		
+		dist[0] = 0;
+		
+		while(1){
+			int minPos = -1, minDist = INF;
+			for(int i=0;i<nNode;i++){
+				if(dist[i] < minDist && !visited[i]){
+					minDist = dist[i];
+					minPos = i;
+				}
+			}
+			if(minPos == -1) break;
+			visited[minPos] = 1;
+			for(auto x:edge[minPos]){
+				if(dist[minPos] + x.w < dist[x.v] && !visited[x.v]){
+					dist[x.v] = dist[minPos] + x.w;
+					hapin[x.v] = hapin[minPos] + weight[x.v];
+					front[x.v] = front[minPos] + 1;
+					pre[x.v] = minPos;
+					path[x.v] = path[minPos];
+				}else if(dist[minPos] + x.w == dist[x.v] && !visited[x.v]){
+					if(hapin[x.v] < hapin[minPos] + weight[x.v]){
+						hapin[x.v] = hapin[minPos] + weight[x.v];
+						front[x.v] = front[minPos] + 1;
+						pre[x.v] = minPos;
+					}else if(hapin[x.v] == hapin[minPos] + weight[x.v] && front[minPos] + 1 < front[x.v]){
+						front[x.v] = front[minPos] + 1;
+						pre[x.v] = minPos;
+					}
+					path[x.v] = path[minPos] + path[x.v];
+				}
+			}
+		}
+//		for(auto x:path) cout << x << " ";
+//		cout << endl;
+		cout << path[rom] << " " << dist[rom] << " " << hapin[rom] << " " << (int)(hapin[rom]/(front[rom]*1.0))<< endl;
+		list<int> tpath;
+		int end = rom;
+		tpath.push_back(end);
+		while(pre[end]!=-1){
+			end = pre[end];
+			tpath.push_front(end);
+		}
+		vector<string> fpath;
+		for(auto x:tpath){
+			fpath.push_back(pos[x]);
+		}
+		for(auto it = fpath.begin(); it!=fpath.end()-1;it++) cout << *it << "->";
+		cout << *(fpath.end()-1) << endl;
+		return ;
+	}
+};
+
+int main(){
+	int N, K;
+	string start;
+	string p1, p2;
+	int d;
+	map<int, string> pos;
+	map<string, int> rpos;
+	cin >> N >> K >> start;
+	vector<int> weight(N, 0);
+	
+	pos[0] = start;
+	rpos[start] = 0;
+	weight[0] = 0;
+
+	int rom;
+	for(int i=1;i<N;i++){
+		cin >> p1 >> d;
+		if(p1 == "ROM") rom=i;
+		pos[i] = p1;
+		rpos[p1] = i;
+		weight[i] = d;
+		
+	}
+	Graph g(N, weight);
+	for(int i=0;i<K;i++){
+		cin >> p1 >> p2 >> d;
+		g.add_edge(rpos[p1], rpos[p2], d);
+	}
+	g.dijkstra(pos, rom);
+	return 0;
+}
