@@ -1,0 +1,91 @@
+#include<iostream>
+#include<list>
+#include<vector>
+#include<set>
+#include<map>
+#include<cstdio>
+#include<algorithm>
+
+using namespace std;
+
+bool cmp(int a, int b){
+	return a > b;
+}
+
+class UFSet{
+public:
+	vector<int> S;
+	map<int, int> hobby;
+	int nNode;
+	UFSet(int n){
+		vector<int> *temp = new vector<int>(n, -1);
+		S = *temp;
+		nNode = n;
+	}
+	int Find(int X){
+		if(S[X] < 0) return X;
+		else return S[X] = Find(S[X]);
+	}
+	void Union(int X1, int X2){
+		int Root1 = Find(X1);
+		int Root2 = Find(X2);
+		if(Root1 == Root2) return;
+		
+		if(S[Root1] < S[Root2]){
+			S[Root1] += S[Root2];
+			S[Root2] = Root1;
+		}else {
+			S[Root2] += S[Root1];
+			S[Root1] = Root2;
+		}
+	}
+	void addH(int X, list<int> th){
+		int Root = Find(X);
+		for(auto x:th){
+			hobby[x] = Root;
+		}
+	}
+	void Input(int i){
+		int k;
+		scanf("%d:", &k);
+		int h;
+		list<int> th;
+		int c = -1;
+		while(k--){
+			cin >> h;
+			th.push_back(h);
+			auto it = hobby.find(h);
+			if(it != hobby.end()){
+				c = hobby[h];
+				Union(i, c);
+			}
+		}
+		addH(i, th);
+	}
+	void output(){
+		int cnt = 0;
+		vector<int> nums;
+		for(int i=1;i<nNode;i++){
+			if(S[i] < 0){
+				cnt++;
+				nums.push_back(-1*S[i]);
+			}
+		}
+		cout << cnt << endl;
+		sort(nums.begin(), nums.end(), cmp);
+		for(auto it = nums.begin();it!=nums.end()-1;it++) cout << *it << " "; 
+		cout << *(nums.end()-1) << endl;\
+		return ;
+	}
+};
+
+
+
+int main(){
+	int N;
+	cin >> N;
+	UFSet uf(N+1);
+	for(int i=1;i<=N;i++) uf.Input(i);
+	uf.output();
+	return 0;
+}
