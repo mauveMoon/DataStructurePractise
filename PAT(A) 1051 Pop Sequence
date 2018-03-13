@@ -1,0 +1,33 @@
+#include<iostream>
+#include<stack>
+#include<queue>
+
+using namespace std;
+
+int main(){
+	
+	int M, N, K, X;
+	cin >> M >> N >> K;
+	for(int p=0;p<K;p++){
+		stack<int> simu;
+		queue<int> temp;
+		for(int q=0;q<N;q++){
+			cin >> X;
+			temp.push(X);
+		}
+		
+		for(int i=1;i<=N;i++){
+			if(simu.size() < M) simu.push(i);
+			while(!simu.empty()){
+				if(simu.top() == temp.front()){
+					simu.pop();
+					temp.pop();
+				}else break;
+			}
+		}
+		if(!simu.empty() || !temp.empty())	cout << "NO" << endl;
+		else cout << "YES" << endl;
+		
+	}
+	return 0;
+}
